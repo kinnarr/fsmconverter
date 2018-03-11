@@ -22,7 +22,8 @@ type FsmCreatorConfig struct {
 }
 
 type state struct {
-	Successors map[string]RootCondition `toml:"next"`
+	Successors       map[string]RootCondition `toml:"next"`
+	DefaultSuccessor map[string]interface{}   `toml:"else"`
 }
 
 type RootCondition struct {

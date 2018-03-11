@@ -16,6 +16,17 @@ func ValidateStates() bool {
 				returnValue = validateRootCondition(next, nextName) && returnValue
 			}
 		}
+		if len(state.DefaultSuccessor) > 1 {
+			zap.S().Errorf("Only one else state allowed! State %s\n", stateName)
+			returnValue = false
+		} else {
+			for elseName := range state.DefaultSuccessor {
+				if _, ok := config.MainConfig.States[elseName]; !ok {
+					zap.S().Errorf("Unknown else state %s for state %s\n", elseName, stateName)
+					returnValue = false
+				}
+			}
+		}
 	}
 	return returnValue
 }

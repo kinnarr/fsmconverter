@@ -74,6 +74,9 @@ var prettyprintCmd = &cobra.Command{
 			for nextName, next := range state.Successors {
 				fsmOuputBuffer.WriteString(validation.RootConditionToString(next, nextName))
 			}
+			for elseName := range state.DefaultSuccessor {
+				fsmOuputBuffer.WriteString(fmt.Sprintf("\telse: next <= %s\n", elseName))
+			}
 		}
 
 		fmt.Print(fsmOuputBuffer.String())
