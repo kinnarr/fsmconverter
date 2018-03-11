@@ -62,5 +62,6 @@ var validateCmd = &cobra.Command{
 		}
 
 		validation.ValidateStates()
+		validation.ValidateOutputs()
 	},
 }

@@ -62,7 +62,7 @@ var prettyprintCmd = &cobra.Command{
 			return
 		}
 
-		if !validation.ValidateStates() {
+		if !validation.ValidateStates() || !validation.ValidateOutputs() {
 			zap.S().Errorf("Validation failed! See errors above!\n")
 			return
 		}

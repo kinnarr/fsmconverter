@@ -5,6 +5,17 @@ import (
 	"go.uber.org/zap"
 )
 
+func ValidateOutputs() bool {
+	returnValue := true
+	for defaultName := range config.MainConfig.Defaults.Outputs {
+		if _, ok := config.MainConfig.Outputs[defaultName]; !ok {
+			zap.S().Errorf("Default for unknown output %s defined!\n", defaultName)
+			returnValue = false
+		}
+	}
+	return returnValue
+}
+
 func ValidateStates() bool {
 	returnValue := true
 	for stateName, state := range config.MainConfig.States {

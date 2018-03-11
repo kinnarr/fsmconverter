@@ -17,8 +17,14 @@ package config
 var MainConfig FsmCreatorConfig
 
 type FsmCreatorConfig struct {
-	States map[string]state `toml:"state"`
-	Inputs map[string]int
+	States   map[string]state `toml:"state"`
+	Inputs   map[string]int
+	Outputs  map[string]int
+	Defaults defaults
+}
+
+type defaults struct {
+	Outputs map[string]int
 }
 
 type state struct {
