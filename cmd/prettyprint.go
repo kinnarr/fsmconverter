@@ -62,24 +62,21 @@ var prettyprintCmd = &cobra.Command{
 			return
 		}
 
+		if !validation.ValidateStates() {
+			zap.S().Errorf("Validation failed! See errors above!\n")
+			return
+		}
+
 		var fsmOuputBuffer bytes.Buffer
-		unknownState := false
 
 		for stateName, state := range config.MainConfig.States {
 			fsmOuputBuffer.WriteString(fmt.Sprintf("State: %s\n", stateName))
 			for nextName, next := range state.Successors {
-				if _, ok := config.MainConfig.States[nextName]; !ok {
-					zap.S().Errorf("[!] Unknown state: %s\n", nextName)
-					unknownState = true
-					continue
-				}
 				fsmOuputBuffer.WriteString(validation.RootConditionToString(next, nextName))
 			}
 		}
 
-		if !unknownState {
-			fmt.Print(fsmOuputBuffer.String())
-		}
+		fmt.Print(fsmOuputBuffer.String())
 
 	},
 }

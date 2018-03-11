@@ -20,15 +20,11 @@ import (
 	"strings"
 
 	"github.com/kinnarr/fsmconverter/config"
-	"go.uber.org/zap"
 )
 
 func RootConditionToString(rc config.RootCondition, nextName string) string {
 	var conditionBuffer bytes.Buffer
-	if rc.And != nil && rc.Or != nil {
-		zap.S().Errorf("[!] Root condition can't contain 'and' and 'or' part: %s", nextName)
-		return ""
-	}
+
 	if rc.And == nil && rc.Or == nil {
 		conditionBuffer.WriteString(fmt.Sprintf("\talways: next <= %s\n", nextName))
 	} else {
@@ -57,8 +53,6 @@ func conditionToString(c config.Condition, logicalOp string) string {
 	for conditionName, conditionValue := range c.Conditions {
 		if _, ok := config.MainConfig.Inputs[conditionName]; ok {
 			conditionStrings = append(conditionStrings, fmt.Sprintf("%s == %d", conditionName, conditionValue))
-		} else {
-			zap.S().Errorf("Could not find input from condition: %s", conditionName)
 		}
 	}
 	if c.And != nil {
@@ -66,10 +60,6 @@ func conditionToString(c config.Condition, logicalOp string) string {
 	}
 	if c.Or != nil {
 		conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(*c.Or)))
-	}
-	if len(conditionStrings) == 0 {
-		zap.S().Errorf("No conditions found for state! Maybe you forgot an .condition")
-		return "ERR"
 	}
 	return strings.Join(conditionStrings, fmt.Sprintf(" %s ", logicalOp))
 }

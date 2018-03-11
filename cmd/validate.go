@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"go.uber.org/zap"
 
 	"github.com/kinnarr/fsmconverter/config"
 	"github.com/kinnarr/fsmconverter/validation"
@@ -62,14 +61,6 @@ var validateCmd = &cobra.Command{
 			return
 		}
 
-		for _, state := range config.MainConfig.States {
-			for nextName, next := range state.Successors {
-				if _, ok := config.MainConfig.States[nextName]; !ok {
-					zap.S().Errorf("Unknown state: %s\n", nextName)
-					continue
-				}
-				validation.RootConditionToString(next, nextName)
-			}
-		}
+		validation.ValidateStates()
 	},
 }
