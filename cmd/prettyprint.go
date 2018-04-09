@@ -16,16 +16,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
 	"bytes"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
 
-	"github.com/felixangell/toml"
 	"go.uber.org/zap"
 
 	"github.com/kinnarr/fsmconverter/config"
@@ -40,25 +35,7 @@ var prettyprintCmd = &cobra.Command{
 	Use:   "prettyprint",
 	Short: "Print the fsm config in a pretty stil",
 	Run: func(cmd *cobra.Command, args []string) {
-		searchDir := "fsm"
-
-		fileList := []string{}
-		_ = filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
-			if strings.HasSuffix(path, ".toml") {
-				fileList = append(fileList, path)
-			}
-			return nil
-		})
-
-		var tomlBuffer bytes.Buffer
-		for _, file := range fileList {
-			if readedBytes, err := ioutil.ReadFile(file); err == nil {
-				tomlBuffer.Write(readedBytes)
-			}
-		}
-
-		if _, err := toml.Decode(tomlBuffer.String(), &config.MainConfig); err != nil {
-			fmt.Println(err)
+		if !config.ParseConfig() {
 			return
 		}
 
