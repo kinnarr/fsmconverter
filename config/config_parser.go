@@ -11,10 +11,11 @@ import (
 	"github.com/felixangell/toml"
 )
 
+var FsmConfigRootDir string
+
 func ParseConfig() bool {
-	searchDir := "fsm"
 	fileList := []string{}
-	_ = filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+	_ = filepath.Walk(FsmConfigRootDir, func(path string, f os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".toml") {
 			fileList = append(fileList, path)
 		}

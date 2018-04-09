@@ -18,12 +18,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kinnarr/fsmconverter/config"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "fsmconverter",
 	Short: "FSMconverter a toml to verilog compiler",
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVar(&config.FsmConfigRootDir, "fsm-config-dir", "fsm", "search here for fsm config")
 }
 
 func Execute() {
