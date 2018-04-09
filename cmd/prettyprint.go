@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/BurntSushi/toml"
+	"github.com/felixangell/toml"
 	"go.uber.org/zap"
 
 	"github.com/kinnarr/fsmconverter/config"

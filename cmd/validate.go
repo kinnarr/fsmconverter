@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/BurntSushi/toml"
+	"github.com/felixangell/toml"
 
 	"github.com/kinnarr/fsmconverter/config"
 	"github.com/kinnarr/fsmconverter/validation"
