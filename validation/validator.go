@@ -15,6 +15,8 @@
 package validation
 
 import (
+	"fmt"
+
 	"github.com/kinnarr/fsmconverter/config"
 	"go.uber.org/zap"
 )
@@ -73,10 +75,15 @@ func validateRootCondition(rc config.RootCondition, nextName string) bool {
 func validateCondition(c config.Condition, nextName string) bool {
 	returnValue := true
 	for _, condition := range c.Conditions {
-		for conditionName := range condition {
-			if _, ok := config.MainConfig.Inputs[conditionName]; !ok {
-				zap.S().Errorf("Could not find input from condition for next state '%s': %s", nextName, conditionName)
+		for conditionName, conditionValue := range condition {
+			if inputSize, ok := config.MainConfig.Inputs[conditionName]; !ok {
+				zap.S().Errorf("Could not find input %s from condition for next state '%s'", conditionName, nextName)
 				returnValue = false
+			} else {
+				if inputSize < len(fmt.Sprintf("%b", conditionValue)) {
+					zap.S().Errorf("Value for input %s from condition for next state '%s' is too large", conditionName, nextName)
+					returnValue = false
+				}
 			}
 		}
 		if c.And != nil {
