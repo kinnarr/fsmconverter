@@ -20,11 +20,15 @@ import (
 
 	"github.com/kinnarr/fsmconverter/config"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "fsmconverter",
 	Short: "FSMconverter a toml to verilog compiler",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		zap.S().Infof("Current config dir is %s\n", config.FsmConfigRootDir)
+	},
 }
 
 func init() {
