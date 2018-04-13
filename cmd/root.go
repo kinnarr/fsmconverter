@@ -27,12 +27,13 @@ var rootCmd = &cobra.Command{
 	Use:   "fsmconverter",
 	Short: "FSMconverter a toml to verilog compiler",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		zap.S().Infof("Current config dir is %s\n", config.FsmConfigRootDir)
+		zap.S().Infof("Current config dir is %s", config.FsmConfigRootDir)
 	},
 }
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&config.FsmConfigRootDir, "fsm-config-dir", "fsm", "search here for fsm config")
+	rootCmd.PersistentFlags().BoolVar(&config.IgnoreUnknownStates, "ignore-unknown-states", false, "ignores unknown states in validation")
 }
 
 func Execute() {
