@@ -24,6 +24,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kinnarr/fsmconverter/config"
+	"github.com/kinnarr/fsmconverter/generation"
 	"github.com/kinnarr/fsmconverter/validation"
 )
 
@@ -49,7 +50,7 @@ var prettyprintCmd = &cobra.Command{
 		for stateName, state := range config.MainConfig.States {
 			fsmOuputBuffer.WriteString(fmt.Sprintf("State: %s\n", stateName))
 			for nextName, next := range state.Successors {
-				fsmOuputBuffer.WriteString(validation.RootConditionToString(next, nextName))
+				fsmOuputBuffer.WriteString(generation.RootConditionToString(next, nextName))
 			}
 			for elseName := range state.DefaultSuccessor {
 				fsmOuputBuffer.WriteString(fmt.Sprintf("\telse: next <= %s\n", elseName))

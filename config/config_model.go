@@ -40,5 +40,5 @@ type RootCondition struct {
 type Condition struct {
 	And        *Condition
 	Or         *Condition
-	Conditions map[string]int `toml:"condition"`
+	Conditions []map[string]int `toml:"condition"`
 }

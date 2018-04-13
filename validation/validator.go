@@ -72,21 +72,23 @@ func validateRootCondition(rc config.RootCondition, nextName string) bool {
 
 func validateCondition(c config.Condition, nextName string) bool {
 	returnValue := true
-	for conditionName := range c.Conditions {
-		if _, ok := config.MainConfig.Inputs[conditionName]; !ok {
-			zap.S().Errorf("Could not find input from condition for next state '%s': %s", nextName, conditionName)
+	for _, condition := range c.Conditions {
+		for conditionName := range condition {
+			if _, ok := config.MainConfig.Inputs[conditionName]; !ok {
+				zap.S().Errorf("Could not find input from condition for next state '%s': %s", nextName, conditionName)
+				returnValue = false
+			}
+		}
+		if c.And != nil {
+			returnValue = validateCondition(*c.And, nextName) && returnValue
+		}
+		if c.Or != nil {
+			returnValue = validateCondition(*c.Or, nextName) && returnValue
+		}
+		if len(c.Conditions) == 0 && c.And == nil && c.Or == nil {
+			zap.S().Errorf("No conditions found for state! Maybe you forgot an .condition")
 			returnValue = false
 		}
-	}
-	if c.And != nil {
-		returnValue = validateCondition(*c.And, nextName) && returnValue
-	}
-	if c.Or != nil {
-		returnValue = validateCondition(*c.Or, nextName) && returnValue
-	}
-	if len(c.Conditions) == 0 && c.And == nil && c.Or == nil {
-		zap.S().Errorf("No conditions found for state! Maybe you forgot an .condition")
-		returnValue = false
 	}
 	return returnValue
 }

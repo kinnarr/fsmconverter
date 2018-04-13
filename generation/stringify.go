@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package validation
+package generation
 
 import (
 	"bytes"
@@ -50,16 +50,18 @@ func conditionOrToString(c config.Condition) string {
 
 func conditionToString(c config.Condition, logicalOp string) string {
 	conditionStrings := make([]string, 0)
-	for conditionName, conditionValue := range c.Conditions {
-		if _, ok := config.MainConfig.Inputs[conditionName]; ok {
-			conditionStrings = append(conditionStrings, fmt.Sprintf("%s == %d", conditionName, conditionValue))
+	for _, condition := range c.Conditions {
+		for conditionName, conditionValue := range condition {
+			if _, ok := config.MainConfig.Inputs[conditionName]; ok {
+				conditionStrings = append(conditionStrings, fmt.Sprintf("%s == %d", conditionName, conditionValue))
+			}
 		}
-	}
-	if c.And != nil {
-		conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionAndToString(*c.And)))
-	}
-	if c.Or != nil {
-		conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(*c.Or)))
+		if c.And != nil {
+			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionAndToString(*c.And)))
+		}
+		if c.Or != nil {
+			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(*c.Or)))
+		}
 	}
 	return strings.Join(conditionStrings, fmt.Sprintf(" %s ", logicalOp))
 }
