@@ -49,19 +49,27 @@ func conditionOrToString(c config.Condition) string {
 }
 
 func conditionToString(c config.Condition, logicalOp string) string {
+	return conditionToStringOptBinary(c, logicalOp, true)
+}
+
+func conditionToStringOptBinary(c config.Condition, logicalOp string, printBinary bool) string {
 	conditionStrings := make([]string, 0)
 	for _, condition := range c.Conditions {
 		for conditionName, conditionValue := range condition {
 			if _, ok := config.MainConfig.Inputs[conditionName]; ok {
-				conditionStrings = append(conditionStrings, fmt.Sprintf("%s == %d", conditionName, conditionValue))
+				if printBinary {
+					conditionStrings = append(conditionStrings, fmt.Sprintf("%s == %d'b%b", conditionName, config.MainConfig.Inputs[conditionName], conditionValue))
+				} else {
+					conditionStrings = append(conditionStrings, fmt.Sprintf("%s == %d", conditionName, conditionValue))
+				}
 			}
 		}
-		if c.And != nil {
-			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionAndToString(*c.And)))
-		}
-		if c.Or != nil {
-			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(*c.Or)))
-		}
+	}
+	if c.And != nil {
+		conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionAndToString(*c.And)))
+	}
+	if c.Or != nil {
+		conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(*c.Or)))
 	}
 	return strings.Join(conditionStrings, fmt.Sprintf(" %s ", logicalOp))
 }
