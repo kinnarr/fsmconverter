@@ -18,7 +18,7 @@ var MainConfig FsmCreatorConfig
 var IgnoreUnknownStates bool
 
 type FsmCreatorConfig struct {
-	States   map[string]state `toml:"state"`
+	States   map[string]State `toml:"state"`
 	Inputs   map[string]int
 	Outputs  map[string]int
 	Defaults defaults
@@ -28,9 +28,11 @@ type defaults struct {
 	Outputs map[string]int
 }
 
-type state struct {
+type State struct {
 	Successors       map[string]RootCondition `toml:"next"`
 	DefaultSuccessor map[string]interface{}   `toml:"else"`
+	Outputs          map[string]int
+	Preserve         bool
 }
 
 type RootCondition struct {

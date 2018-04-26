@@ -54,6 +54,17 @@ func ValidateStates() bool {
 				}
 			}
 		}
+		for outputName, outputValue := range state.Outputs {
+			if outputSize, ok := config.MainConfig.Outputs[outputName]; !ok {
+				zap.S().Errorf("Could not find output %s from state '%s'", outputName, stateName)
+				returnValue = false
+			} else {
+				if outputSize < len(fmt.Sprintf("%b", outputValue)) {
+					zap.S().Errorf("Value for output %s from state '%s' is too large", outputName, stateName)
+					returnValue = false
+				}
+			}
+		}
 	}
 	return returnValue
 }
