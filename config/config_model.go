@@ -16,6 +16,7 @@ package config
 
 var MainConfig FsmCreatorConfig
 var IgnoreUnknownStates bool
+var Optimize bool
 
 type FsmCreatorConfig struct {
 	States   map[string]State `toml:"state"`

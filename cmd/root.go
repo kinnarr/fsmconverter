@@ -42,6 +42,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().StringVar(&config.FsmConfigRootDir, "fsm-config-dir", "fsm", "search here for fsm config")
 	rootCmd.PersistentFlags().BoolVar(&config.IgnoreUnknownStates, "ignore-unknown-states", false, "ignores unknown states in validation")
+	rootCmd.PersistentFlags().BoolVar(&config.Optimize, "optimize", false, "optimize state of fsm")
 	rootCmd.PersistentFlags().BoolVar(&debugLoggerConfig, "debug", false, "debugging output")
 }
 
