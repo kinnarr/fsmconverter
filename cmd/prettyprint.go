@@ -48,7 +48,7 @@ var prettyprintCmd = &cobra.Command{
 		var fsmOuputBuffer bytes.Buffer
 
 		for stateName, state := range config.MainConfig.States {
-			fsmOuputBuffer.WriteString(fmt.Sprintf("State: %s\n", stateName))
+			fsmOuputBuffer.WriteString(fmt.Sprintf("State: %s (#Outputs: %d)\n", stateName, len(state.Outputs)))
 			for nextName, next := range state.Successors {
 				fsmOuputBuffer.WriteString(generation.RootConditionToString(next, nextName))
 			}

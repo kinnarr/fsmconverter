@@ -20,10 +20,10 @@ import (
 )
 
 func main() {
-	loggerConfig := zap.NewDevelopmentConfig()
-	loggerConfig.DisableStacktrace = true
-	loggerConfig.DisableCaller = true
-	logger, _ := loggerConfig.Build()
+	cmd.LoggerConfig = zap.NewDevelopmentConfig()
+	cmd.LoggerConfig.DisableStacktrace = true
+	cmd.LoggerConfig.DisableCaller = true
+	logger, _ := cmd.LoggerConfig.Build()
 	defer logger.Sync()
 
 	undo := zap.ReplaceGlobals(logger)
