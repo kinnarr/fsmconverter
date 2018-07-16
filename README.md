@@ -20,7 +20,7 @@ Typing 'fsmconverter' should now show you the help screen of fsmconverter.
 The states and their respective inputs, outputs and transitions are specified in one or several .toml files. These files are placed in one folder with an arbitrary sub-folder structure. 
 Fsm converter reads in this directory(specified with the '--fsm-config-dir' flag) and either validates('fsmconverter validate') or prints the found states in an orderly way('fsmconverter prettyprint').
 
-##File structure
+## File structure
 ### List states
 ```toml
 [state.EXAMPLE]
