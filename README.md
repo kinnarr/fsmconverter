@@ -58,7 +58,7 @@ Outputs need to be defined similarly to to the inputs; for every output variable
 output1=3		#3'b000
 output2=4		#4'b0000
 
-[defaults]
+[defaults.outputs]
 output1=0		#3'b000
 output2=15		#4'b1111
 '''
