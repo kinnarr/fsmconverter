@@ -26,6 +26,7 @@ type FsmCreatorConfig struct {
 
 type defaults struct {
 	Outputs map[string]int
+	State   string
 }
 
 type State struct {

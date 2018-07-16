@@ -21,8 +21,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func ValidateOutputs() bool {
+func ValidateDefaults() bool {
 	returnValue := true
+	if config.MainConfig.Defaults.State == "" {
+		zap.S().Errorf("Default state not defined!")
+		returnValue = false
+	} else {
+		if _, ok := config.MainConfig.States[config.MainConfig.Defaults.State]; !ok && !config.IgnoreUnknownStates {
+			zap.S().Errorf("Unknown default state %s", config.MainConfig.Defaults.State)
+			returnValue = false
+		}
+	}
 	for defaultName := range config.MainConfig.Defaults.Outputs {
 		if _, ok := config.MainConfig.Outputs[defaultName]; !ok {
 			zap.S().Errorf("Default for unknown output %s defined!", defaultName)
