@@ -65,7 +65,6 @@ func optimizeState(stateName string) bool {
 		}
 		nextState := OptimizedConfig.States[nextName]
 		if len(nextState.Outputs) == 0 && !nextState.Preserve {
-			// TODO: or combination if nextNextState already in state.Successors
 			found := false
 			for nextNextName, nextNextRC := range nextState.Successors {
 				found = true
