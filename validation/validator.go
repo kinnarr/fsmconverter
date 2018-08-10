@@ -69,7 +69,7 @@ func ValidateStates() bool {
 				returnValue = false
 			} else {
 				if outputSize < len(fmt.Sprintf("%b", outputValue)) {
-					zap.S().Errorf("Value for output %s from state '%s' is too large", outputName, stateName)
+					zap.S().Errorf("Value %b for output %s from state '%s' is too large (size: %d)", outputValue, outputName, stateName, outputSize)
 					returnValue = false
 				}
 			}
