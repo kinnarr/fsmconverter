@@ -20,6 +20,7 @@ import (
 
 	"github.com/kinnarr/fsmconverter/config"
 	"github.com/kinnarr/fsmconverter/generation"
+	"github.com/kinnarr/fsmconverter/optimization"
 	"github.com/kinnarr/fsmconverter/validation"
 )
 
@@ -38,6 +39,15 @@ var generationDotCmd = &cobra.Command{
 		if !validation.ValidateStates() || !validation.ValidateDefaults() {
 			zap.S().Errorf("Validation failed! See errors above!\n")
 			return
+		}
+
+		if config.Optimize {
+			optimization.OptimizeConfig()
+
+			if !validation.ValidateStates() || !validation.ValidateDefaults() {
+				zap.S().Errorf("Validation failed! See errors above!\n")
+				return
+			}
 		}
 
 		generation.GenerateDot()
