@@ -34,7 +34,7 @@ func OptimizeConfig() {
 		for stateName := range OptimizedConfig.States {
 			OptimizedConfig.NoModification = !optimizeState(stateName) && OptimizedConfig.NoModification
 			count++
-			zap.S().Debugf("Number of states done: %d, currently: %s", count, stateNam
+			zap.S().Debugf("Number of states done: %d, currently: %s", count, stateName)
 		}
 
 		for oStateName, oState := range OptimizedConfig.States {
