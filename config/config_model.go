@@ -32,7 +32,7 @@ type defaults struct {
 type State struct {
 	Successors       map[string]RootCondition `toml:"next"`
 	DefaultSuccessor map[string]interface{}   `toml:"else"`
-	Outputs          map[string]int
+	Outputs          map[string]int           `toml:"output"`
 	Preserve         bool
 }
 

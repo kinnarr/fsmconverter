@@ -17,7 +17,7 @@ go install
 Typing 'fsmconverter' should now show you the help screen of fsmconverter.
 
 ## Usage
-The states and their respective inputs, outputs and transitions are specified in one or several .toml files. These files are placed in one folder with an arbitrary sub-folder structure. 
+The states and their respective inputs, outputs and transitions are specified in one or several .toml files. These files are placed in one folder with an arbitrary sub-folder structure.
 Fsm converter reads in this directory(specified with the '--fsm-config-dir' flag) and either validates('fsmconverter validate') or prints the found states in an orderly way('fsmconverter prettyprint').
 
 ## File structure
@@ -39,6 +39,11 @@ condition4=0x3      #and hexadecimal notation
 Sometimes you want to define a default transition that is taken only when the conditions of the other possible transitions are not met.
 ```toml
 [state.EXAMPLE1.else.Example3]
+```
+
+#### Output of state
+```toml
+[state.EXAMPLE1.output]
 ```
 
 ### Inputs
