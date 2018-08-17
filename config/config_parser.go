@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/felixangell/toml"
+	"github.com/imdario/mergo"
 	"go.uber.org/zap"
 )
 
@@ -30,10 +31,12 @@ func ParseConfig() bool {
 
 	_ = filepath.Walk(FsmConfigRootDir, func(path string, f os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".toml") {
-			if _, err := toml.DecodeFile(path, &MainConfig); err != nil {
+			var currentFileConfig FsmCreatorConfig
+			if _, err := toml.DecodeFile(path, &currentFileConfig); err != nil {
 				zap.S().Errorf("Error parsing toml file %s: %s", path, err)
 				returnValue = false
 			}
+			mergo.Merge(&MainConfig, currentFileConfig)
 		}
 		return nil
 	})
