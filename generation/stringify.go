@@ -41,11 +41,11 @@ func RootConditionToString(rc config.RootCondition, nextName string) string {
 }
 
 func conditionAndToString(c config.Condition) string {
-	return conditionToString(c, "and")
+	return conditionToString(c, config.AndString)
 }
 
 func conditionOrToString(c config.Condition) string {
-	return conditionToString(c, "or")
+	return conditionToString(c, config.AndString)
 }
 
 func conditionToString(c config.Condition, logicalOp string) string {

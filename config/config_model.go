@@ -17,6 +17,8 @@ package config
 var MainConfig FsmCreatorConfig
 var IgnoreUnknownStates bool
 var Optimize bool
+var AndString string = "and"
+var OrString string = "or"
 
 type FsmCreatorConfig struct {
 	States   map[string]State `toml:"state"`

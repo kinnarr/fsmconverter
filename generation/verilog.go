@@ -26,6 +26,8 @@ import (
 
 func GenerateVerilog() {
 	var conditionBuffer bytes.Buffer
+	config.AndString = "&&"
+	config.OrString = "||"
 
 	funcMap := template.FuncMap{
 		"conditionToString": conditionToString,
