@@ -83,6 +83,16 @@ func optimizeState(stateName string) bool {
 					state.Successors[nextNextName] = mergeRootConditionsAnd(nextRC, nextNextRC)
 				}
 			}
+			for nextElseName := range nextState.DefaultSuccessor {
+				found = true
+				if stateRc, ok := state.Successors[nextElseName]; ok {
+					zap.S().Debugf("%s already in %s, or-ing", nextElseName, stateName)
+					delete(state.Successors, nextElseName)
+					state.Successors[nextElseName] = mergeRootConditionsOr(stateRc, nextRC)
+				} else {
+					state.Successors[nextElseName] = nextRC
+				}
+			}
 			if found {
 				delete(state.Successors, nextName)
 				deletedStates[nextName] = struct{}{}
@@ -93,6 +103,46 @@ func optimizeState(stateName string) bool {
 			}
 		} else {
 			zap.S().Debugf("Next state %s has %d outputs and preserve is %v", nextName, len(nextState.Outputs), nextState.Preserve)
+		}
+	}
+	for elseName := range state.DefaultSuccessor {
+		if elseName == stateName {
+			zap.S().Debugf("Don't loop")
+			continue
+		}
+		elseState := OptimizedConfig.States[elseName]
+		if len(elseState.Outputs) == 0 && !elseState.Preserve {
+			found := false
+			for nextNextName, nextNextRC := range elseState.Successors {
+				found = true
+				if stateRc, ok := state.Successors[nextNextName]; ok {
+					zap.S().Debugf("%s already in %s, or-ing", nextNextName, stateName)
+					delete(state.Successors, nextNextName)
+					state.Successors[nextNextName] = mergeRootConditionsOr(stateRc, nextNextRC)
+				} else {
+					state.Successors[nextNextName] = nextNextRC
+				}
+			}
+			for nextElseName := range elseState.DefaultSuccessor {
+				found = true
+				if stateRc, ok := state.Successors[nextElseName]; ok {
+					zap.S().Debugf("%s already in %s, or-ing", nextElseName, stateName)
+					delete(state.Successors, nextElseName)
+					state.Successors[nextElseName] = stateRc
+				} else {
+					state.DefaultSuccessor[nextElseName] = struct{}{}
+				}
+			}
+			if found {
+				delete(state.DefaultSuccessor, elseName)
+				deletedStates[elseName] = struct{}{}
+				stateModified = true
+			} else {
+				zap.S().Infof("No follow ups found for %s at %s", elseName, stateName)
+				notToDeleteStates[elseName] = struct{}{}
+			}
+		} else {
+			zap.S().Debugf("Next state %s has %d outputs and preserve is %v", elseName, len(elseState.Outputs), elseState.Preserve)
 		}
 	}
 
