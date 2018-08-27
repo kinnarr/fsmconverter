@@ -19,7 +19,8 @@ module fsm (
   {{ range $inputName, $inputLenght := .Inputs -}}
   {{$inputName}},
   {{end -}}
-  state
+  state,
+  state_set
   );
   {{$countStates := len $.States}}
   {{$binaryStateSize := getBinarySize $countStates }}
