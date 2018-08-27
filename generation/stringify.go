@@ -45,7 +45,7 @@ func conditionAndToString(c config.Condition) string {
 }
 
 func conditionOrToString(c config.Condition) string {
-	return conditionToString(c, config.AndString)
+	return conditionToString(c, config.OrString)
 }
 
 func conditionToString(c config.Condition, logicalOp string) string {
