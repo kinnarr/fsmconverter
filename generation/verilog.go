@@ -60,6 +60,7 @@ func GenerateVerilog(outputDir string) {
 
 	cuPath := filepath.Join(absPath, "cu.v")
 	fsmPath := filepath.Join(absPath, "fsm.v")
+	fsmTestbenchSkeletonPath := filepath.Join(absPath, "fsm_tb_skelton.v")
 
 	cuTempl, err := template.New("cu.tpl").Funcs(funcMap).ParseFiles("tmpl/cu.tpl")
 	if err != nil {
@@ -85,5 +86,18 @@ func GenerateVerilog(outputDir string) {
 	err = fsmTempl.Execute(fsmFile, config.MainConfig)
 	if err != nil {
 		zap.S().Fatal("Render fsm template to file", zap.Error(err))
+	}
+
+	fsmTempl, err = template.New("fsm_tb_skeleton.tpl").Funcs(funcMap).ParseFiles("tmpl/fsm_tb_skeleton.tpl")
+	if err != nil {
+		zap.S().Fatal("Create fsm_tb_skeleton template", zap.Error(err))
+	}
+	fsmFile, err = os.Create(fsmTestbenchSkeletonPath)
+	if err != nil {
+		zap.S().Fatal("Create fsm_tb_skeleton file", zap.Error(err))
+	}
+	err = fsmTempl.Execute(fsmFile, config.MainConfig)
+	if err != nil {
+		zap.S().Fatal("Render fsm_tb_skeleton template to file", zap.Error(err))
 	}
 }
