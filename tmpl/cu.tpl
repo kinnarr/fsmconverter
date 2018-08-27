@@ -14,6 +14,7 @@
   limitations under the License.
 */}}
 module cu (
+  state_set,
   state,
   {{ range $outputName, $outputLenght := .Outputs -}}
   {{$outputName}},
@@ -23,32 +24,25 @@ module cu (
   {{$binaryStateSize := getBinarySize $countStates }}
   parameter SIZE = {{ $binaryStateSize }};
 
-  input [SIZE-1:0] state;
+  input wire [SIZE-1:0] state;
+  input wire state_set;
 
   {{ range $outputName, $outputLenght := .Outputs -}}
-  output {{if gt $outputLenght 1}}[{{minus $outputLenght 1}}:0] {{end}}{{$outputName}};
-  {{end -}}
-
-  wire [SIZE-1:0] state;
-  {{ range $inputName, $inputLenght := .Inputs -}}
-  wire {{if gt $inputLenght 1}}[{{minus $inputLenght 1}}:0] {{end}}{{$inputName}};
-  {{end -}}
-  {{ range $outputName, $outputLenght := .Outputs -}}
-  reg {{if gt $outputLenght 1}}[{{minus $outputLenght 1}}:0] {{end}}{{$outputName}};
+  output reg {{if gt $outputLenght 1}}[{{minus $outputLenght 1}}:0] {{end}}{{$outputName}};
   {{end -}}
 
   parameter {{ range $index, $stateName := enumerateKeys .States }}{{$stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
 
-  always @ (state)
+  always @ (state_set)
   begin
     {{ range $outputName, $outputValue := .Defaults.Outputs -}}
-    {{$outputName}} <= {{convertBinary $outputValue (index $.Outputs $outputName)}};
+    {{$outputName}} = {{convertBinary $outputValue (index $.Outputs $outputName)}};
     {{end -}}
     case(state)
     {{- range $stateName, $state := .States}}
       {{$stateName}} : begin
             {{range $outputName, $outputValue := $state.Outputs -}}
-              {{$outputName}} <= {{convertBinary $outputValue (index $.Outputs $outputName)}};
+              {{$outputName}} = {{convertBinary $outputValue (index $.Outputs $outputName)}};
             {{end -}}
           end
     {{end -}}
