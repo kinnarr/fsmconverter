@@ -24,7 +24,10 @@ import (
 	"github.com/kinnarr/fsmconverter/validation"
 )
 
+var outputDir string
+
 func init() {
+	generationVerilogCmd.Flags().StringVarP(&outputDir, "output", "o", "fsmoutput", "Output directory for generated verilog code")
 	rootCmd.AddCommand(generationVerilogCmd)
 }
 
@@ -50,6 +53,6 @@ var generationVerilogCmd = &cobra.Command{
 			}
 		}
 
-		generation.GenerateVerilog()
+		generation.GenerateVerilog(outputDir)
 	},
 }

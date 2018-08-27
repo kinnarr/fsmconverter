@@ -15,17 +15,17 @@
 package generation
 
 import (
-	"bytes"
 	"fmt"
 	"math/bits"
 	"os"
+	"path/filepath"
 	"text/template"
 
 	"github.com/kinnarr/fsmconverter/config"
+	"go.uber.org/zap"
 )
 
-func GenerateVerilog() {
-	var conditionBuffer bytes.Buffer
+func GenerateVerilog(outputDir string) {
 	config.AndString = "&&"
 	config.OrString = "||"
 
@@ -49,14 +49,41 @@ func GenerateVerilog() {
 		},
 	}
 
-	templ, err := template.New("fsm.tpl").Funcs(funcMap).ParseFiles("tmpl/fsm.tpl")
+	absPath, err := filepath.Abs(outputDir)
 	if err != nil {
-		panic(err)
+		zap.S().Fatal("Create fsm path for output", zap.Error(err))
 	}
-	err = templ.Execute(os.Stdout, config.MainConfig)
+	err = os.MkdirAll(absPath, os.ModePerm)
 	if err != nil {
-		panic(err)
+		zap.S().Fatal("Create fsm output directory", zap.Error(err))
 	}
 
-	fmt.Print(conditionBuffer.String())
+	cuPath := filepath.Join(absPath, "cu.v")
+	fsmPath := filepath.Join(absPath, "fsm.v")
+
+	cuTempl, err := template.New("cu.tpl").Funcs(funcMap).ParseFiles("tmpl/cu.tpl")
+	if err != nil {
+		zap.S().Fatal("Create control unit template", zap.Error(err))
+	}
+	cuFile, err := os.Create(cuPath)
+	if err != nil {
+		zap.S().Fatal("Create control unit file", zap.Error(err))
+	}
+	err = cuTempl.Execute(cuFile, config.MainConfig)
+	if err != nil {
+		zap.S().Fatal("Render control unit template to file", zap.Error(err))
+	}
+
+	fsmTempl, err := template.New("fsm.tpl").Funcs(funcMap).ParseFiles("tmpl/fsm.tpl")
+	if err != nil {
+		zap.S().Fatal("Create fsm template", zap.Error(err))
+	}
+	fsmFile, err := os.Create(fsmPath)
+	if err != nil {
+		zap.S().Fatal("Create fsm file", zap.Error(err))
+	}
+	err = fsmTempl.Execute(fsmFile, config.MainConfig)
+	if err != nil {
+		zap.S().Fatal("Render fsm template to file", zap.Error(err))
+	}
 }
