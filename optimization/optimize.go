@@ -19,12 +19,18 @@ import (
 	"go.uber.org/zap"
 )
 
+var deletedStates map[string]interface{}
+var notToDeleteStates map[string]interface{}
+
 func OptimizeConfig() {
 	OptimizedConfig.NoModification = false
 	OptimizedConfig.States = make(map[string]config.State)
 	for stateName, state := range config.MainConfig.States {
 		OptimizedConfig.States[stateName] = state
 	}
+
+	deletedStates = make(map[string]interface{})
+	notToDeleteStates = make(map[string]interface{})
 
 	for !OptimizedConfig.NoModification {
 		zap.S().Info("Start optimize cycle")
@@ -36,20 +42,21 @@ func OptimizeConfig() {
 			count++
 			zap.S().Debugf("Number of states done: %d, currently: %s", count, stateName)
 		}
-
-		for oStateName, oState := range OptimizedConfig.States {
-			if len(oState.Successors) == 0 {
-				delete(OptimizedConfig.States, oStateName)
-			}
-		}
 	}
 
 	config.MainConfig.States = make(map[string]config.State)
 
-	for oStateName, oState := range OptimizedConfig.States {
-		if len(oState.Successors) > 0 {
-			config.MainConfig.States[oStateName] = oState
+	for state := range deletedStates {
+		if _, ok := notToDeleteStates[state]; !ok {
+			zap.S().Debugf("Delete state: %s", state)
+			delete(OptimizedConfig.States, state)
 		}
+	}
+
+	zap.S().Infof("Number of states: %d", len(OptimizedConfig.States))
+
+	for oStateName, oState := range OptimizedConfig.States {
+		config.MainConfig.States[oStateName] = oState
 	}
 
 }
@@ -78,7 +85,11 @@ func optimizeState(stateName string) bool {
 			}
 			if found {
 				delete(state.Successors, nextName)
+				deletedStates[nextName] = struct{}{}
 				stateModified = true
+			} else {
+				zap.S().Infof("No follow ups found for %s at %s", nextName, stateName)
+				notToDeleteStates[nextName] = struct{}{}
 			}
 		} else {
 			zap.S().Debugf("Next state %s has %d outputs and preserve is %v", nextName, len(nextState.Outputs), nextState.Preserve)
