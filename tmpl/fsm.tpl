@@ -33,6 +33,7 @@ module fsm (
 
   output reg [SIZE-1:0] state;
   output reg state_set;
+  initial state_set = 0;
 
   wire clock, reset;
 
