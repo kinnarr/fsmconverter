@@ -154,7 +154,9 @@ func mergeRootConditionsAnd(rc ...config.RootCondition) config.RootCondition {
 	newCondition := new(config.Condition)
 	newCondition.And = mergeConditions(rc[0].And, rc[1].And)
 	newCondition.Or = mergeConditions(rc[0].Or, rc[1].Or)
-	newRootCondition.And = newCondition
+	if !(newCondition.And == nil && newCondition.Or == nil) {
+		newRootCondition.And = newCondition
+	}
 	return newRootCondition
 }
 
@@ -163,7 +165,9 @@ func mergeRootConditionsOr(rc ...config.RootCondition) config.RootCondition {
 	newCondition := new(config.Condition)
 	newCondition.And = mergeConditions(rc[0].And, rc[1].And)
 	newCondition.Or = mergeConditions(rc[0].Or, rc[1].Or)
-	newRootCondition.Or = newCondition
+	if !(newCondition.And == nil && newCondition.Or == nil) {
+		newRootCondition.Or = newCondition
+	}
 	return newRootCondition
 }
 
