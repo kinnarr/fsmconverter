@@ -14,18 +14,16 @@
   limitations under the License.
 */}}
 module cu (
-  state_set,
-  state,
   {{ range $outputName, $outputLenght := .Outputs -}}
   {{$outputName}},
   {{end -}}
+  state
   );
   {{$countStates := len $.States}}
   {{$binaryStateSize := getBinarySize $countStates }}
   parameter SIZE = {{ $binaryStateSize }};
 
   input wire [SIZE-1:0] state;
-  input wire state_set;
 
   {{ range $outputName, $outputLenght := .Outputs -}}
   output reg {{if gt $outputLenght 1}}[{{minus $outputLenght 1}}:0] {{end}}{{$outputName}};
@@ -33,7 +31,7 @@ module cu (
 
   parameter {{ range $index, $stateName := enumerateKeys .States }}{{$stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
 
-  always @ (state_set)
+  always @ (state)
   begin
     {{ range $outputName, $outputValue := .Defaults.Outputs -}}
     {{$outputName}} = {{convertBinary $outputValue (index $.Outputs $outputName)}};

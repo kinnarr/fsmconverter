@@ -20,22 +20,17 @@ module fsm (
   {{$inputName}},
   {{end -}}
   state,
-  state_set
   );
   {{$countStates := len $.States}}
   {{$binaryStateSize := getBinarySize $countStates }}
   parameter SIZE = {{ $binaryStateSize }};
 
-  input clock, reset;
+  input wire clock, reset;
   {{ range $inputName, $inputLenght := .Inputs -}}
   input wire {{if gt $inputLenght 1}}[{{minus $inputLenght 1}}:0] {{end}}{{$inputName}};
   {{end -}}
 
   output reg [SIZE-1:0] state;
-  output reg state_set;
-  initial state_set = 0;
-
-  wire clock, reset;
 
   parameter {{ range $index, $stateName := enumerateKeys .States }}{{$stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
 
@@ -62,14 +57,12 @@ module fsm (
     endcase
   end
 
-  always @ (posedge clock)
+  always @ (posedge clock or posedge reset)
   begin
     if (reset == 1'b1) begin
-      state = {{.Defaults.State}};
-      state_set = !state_set;
+      state <= {{.Defaults.State}};
     end else begin
-      state = next_state;
-      state_set = !state_set;
+      state <= next_state;
     end
   end
 endmodule
