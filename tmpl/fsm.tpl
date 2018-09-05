@@ -43,7 +43,7 @@ module fsm (
     {{- range $stateName, $state := .States}}
       {{$countCondition := 0}}
       {{ upper $stateName}} : {{range $nextName, $next := $state.Successors -}}
-                {{if or $next.And $next.Or}}{{$countCondition := inc $countCondition}}if {{if $next.And}}({{conditionToString $next.And "&&"}}){{end -}}
+                {{if or $next.And $next.Or}}{{$countCondition = inc $countCondition}}if {{if $next.And}}({{conditionToString $next.And "&&"}}){{end -}}
                 {{- if $next.Or}}({{conditionToString $next.Or "||"}}){{end}}{{end}} begin
                   next_state = {{upper $nextName}};
                 end {{if or $next.And $next.Or}}else {{end}}{{end -}}{{if ne $countCondition 0}}begin
