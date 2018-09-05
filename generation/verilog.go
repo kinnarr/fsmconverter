@@ -19,6 +19,7 @@ import (
 	"math/bits"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/kinnarr/fsmconverter/config"
@@ -47,6 +48,7 @@ func GenerateVerilog(outputDir string) {
 		"minus": func(a, b int) int {
 			return a - b
 		},
+		"upper": strings.ToUpper,
 	}
 
 	absPath, err := filepath.Abs(outputDir)

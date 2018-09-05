@@ -29,7 +29,7 @@ module cu (
   output reg {{if gt $outputLenght 1}}[{{minus $outputLenght 1}}:0] {{end}}{{$outputName}};
   {{end -}}
 
-  parameter {{ range $index, $stateName := enumerateKeys .States }}{{$stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
+  parameter {{ range $index, $stateName := enumerateKeys .States }}{{upper $stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
 
   always @ (state)
   begin
@@ -38,7 +38,7 @@ module cu (
     {{end -}}
     case(state)
     {{- range $stateName, $state := .States}}
-      {{$stateName}} : begin
+      {{upper $stateName}} : begin
             {{range $outputName, $outputValue := $state.Outputs -}}
               {{$outputName}} = {{convertBinary $outputValue (index $.Outputs $outputName)}};
             {{end -}}

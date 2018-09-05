@@ -32,7 +32,7 @@ module fsm (
 
   output reg [SIZE-1:0] state;
 
-  parameter {{ range $index, $stateName := enumerateKeys .States }}{{$stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
+  parameter {{ range $index, $stateName := enumerateKeys .States }}{{upper $stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
 
   reg [SIZE-1:0] next_state;
 
@@ -41,26 +41,26 @@ module fsm (
     next_state = {{convertBinary 0 $binaryStateSize}};
     case(state)
     {{- range $stateName, $state := .States}}
-      {{$stateName}} : {{range $nextName, $next := $state.Successors -}}
+      {{ upper $stateName}} : {{range $nextName, $next := $state.Successors -}}
                 if {{if and (not $next.And) (not $next.Or)}}(1){{else}}{{if $next.And}}({{conditionToString $next.And "&&"}}){{end -}}
                 {{- if $next.Or}}({{conditionToString $next.Or "||"}}){{end}}{{end}} begin
-                  next_state = {{$nextName}};
+                  next_state = {{upper $nextName}};
                 end else {{end -}} begin
                   {{- range $elseName, $elseValue := $state.DefaultSuccessor}}
-                  next_state = {{$elseName}};
+                  next_state = {{upper $elseName}};
                   {{- else}}
-                  next_state = {{$stateName}};
+                  next_state = {{upper $stateName}};
                   {{- end}}
                 end
     {{end -}}
-      default : next_state = {{.Defaults.State}};
+      default : next_state = {{upper .Defaults.State}};
     endcase
   end
 
   always @ (posedge clock or posedge reset)
   begin
     if (reset == 1'b1) begin
-      state <= {{.Defaults.State}};
+      state <= {{upper .Defaults.State}};
     end else begin
       state <= next_state;
     end
