@@ -41,17 +41,19 @@ module fsm (
     next_state = {{convertBinary 0 $binaryStateSize}};
     case(state)
     {{- range $stateName, $state := .States}}
+      {{$countCondition := 0}}
       {{ upper $stateName}} : {{range $nextName, $next := $state.Successors -}}
-                if {{if and (not $next.And) (not $next.Or)}}(1){{else}}{{if $next.And}}({{conditionToString $next.And "&&"}}){{end -}}
+                {{if or $next.And $next.Or}}{{$countCondition = inc $countCondition}}if {{if $next.And}}({{conditionToString $next.And "&&"}}){{end -}}
                 {{- if $next.Or}}({{conditionToString $next.Or "||"}}){{end}}{{end}} begin
                   next_state = {{upper $nextName}};
-                end else {{end -}} begin
+                end {{if or $next.And $next.Or}}else {{end}}{{end -}}{{if ne $countCondition 0}}begin
                   {{- range $elseName, $elseValue := $state.DefaultSuccessor}}
                   next_state = {{upper $elseName}};
                   {{- else}}
                   next_state = {{upper $stateName}};
                   {{- end}}
                 end
+                {{- end}}
     {{end -}}
       default : next_state = {{upper .Defaults.State}};
     endcase

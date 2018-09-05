@@ -48,6 +48,9 @@ func GenerateVerilog(outputDir string) {
 		"minus": func(a, b int) int {
 			return a - b
 		},
+		"inc": func(a int) int {
+			return a + 1
+		},
 		"upper": strings.ToUpper,
 	}
 
