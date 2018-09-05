@@ -2,19 +2,39 @@
 A toml to  verilog fsm converter
 
 ## Introduction
-The goal of this project is to simplify the tedious work of creating a finite state machine (FSM) in Verilog code by using the [TOML](https://github.com/toml-lang/toml "Tom's Obvious, Minimal Language") configuration file format.
+The goal of this project is to simplify the tedious work of creating a finite state machine (FSM) in Verilog code by using the [TOML](https://github.com/toml-lang/toml "Tom's Obvious, Minimal Language") configuration file format. 
+It also generates a [Graphviz](https://www.graphviz.org/] .gv dot file. This is useful to get a visual overview of the state transitions.
 
 ## Install process
 As this project is written in [Go](https://golang.org/ "The Go Programming Language") the Go development kit needs to installed on your system. How to do this depends on your OS or distribution.
 For Fedora there is a helpful [article](https://developer.fedoraproject.org/tech/languages/go/go-installation.html) on how to get started. It should be useful for users of other distributions as well.
-Once you have the GOPATH variable set and GOPATH/bin in your PATH as described in the above article,   simply execute
+Once you have the GOPATH variable set and GOPATH/bin in your PATH as described in the above article, simply execute
 ```sh
 cd $GOPATH
-go get -u -v github.com/kinarr/fsmconverter
-cd src/github.com/kinarr/fsmconverter
+go get -u -v github.com/kinnarr/fsmconverter/
+cd src/github.com/kinnarr/fsmconverter
 go install
 ```
-Typing 'fsmconverter' should now show you the help screen of fsmconverter.
+Typing 'fsmconverter' should now show you the help screen of fsmconverter:
+```
+Usage:
+  fsmconverter [command]
+
+Available Commands:
+  generatedot     Generates dot file for graphviz from the fsm config
+  generateverilog Generates verilog from the fsm config
+  help            Help about any command
+  prettyprint     Print the fsm config in a pretty stil
+  printstate      Prints the given fsm state
+  validate        Validates the fsm config
+
+Flags:
+      --debug                   debugging output
+      --fsm-config-dir string   search here for fsm config (default "fsm")
+  -h, --help                    help for fsmconverter
+      --ignore-unknown-states   ignores unknown states in validation
+      --optimize                optimize state of fsm
+```
 
 ## Usage
 The states and their respective inputs, outputs and transitions are specified in one or several .toml files. These files are placed in one folder with an arbitrary sub-folder structure.
@@ -58,7 +78,7 @@ condition4=4		#4'b0000
 ```
 
 ### Outputs
-Outputs need to be defined similarly to to the inputs; for every output variable a default value needs to be specified.
+Outputs need to be defined similarly to the inputs; for every output variable a default value needs to be specified.
 ```toml
 [outputs]
 output1=3		#3'b000
@@ -67,4 +87,9 @@ output2=4		#4'b0000
 [defaults.outputs]
 output1=0		#3'b000
 output2=15		#4'b1111
+```
+A default state (usually the reset state) needs to be provided:
+```toml
+[defaults]
+state="RESET"
 ```
