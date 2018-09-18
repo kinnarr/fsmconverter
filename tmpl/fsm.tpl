@@ -59,12 +59,10 @@ module fsm (
     endcase
   end
 
-  always @ (posedge clock or posedge reset)
+  initial state <= {{upper .Defaults.State}};
+
+  always @ (posedge clock)
   begin
-    if (reset == 1'b1) begin
-      state <= {{upper .Defaults.State}};
-    end else begin
       state <= next_state;
-    end
   end
 endmodule
