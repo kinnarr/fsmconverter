@@ -29,7 +29,8 @@ module cu (
   output reg {{if gt $outputLenght 1}}[{{minus $outputLenght 1}}:0] {{end}}{{$outputName}};
   {{end -}}
 
-  parameter {{ range $stateName, $state := .States }}{{upper $stateName}} = {{convertBinary $state.Statenumber $binaryStateSize}}{{if ne $state.Statenumber (minus $countStates 1)}}, {{end}}{{end}};
+  {{ $counter := 0 }}
+  parameter {{ range $stateName, $state := .States }}{{upper $stateName}} = {{convertBinary $state.Statenumber $binaryStateSize}}{{if ne $counter (minus $countStates 1)}}, {{end}}{{ $counter = inc $counter}}{{end}};
 
   initial
   begin
