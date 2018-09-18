@@ -37,6 +37,7 @@ type State struct {
 	DefaultSuccessor map[string]interface{}   `toml:"else"`
 	Outputs          map[string]int           `toml:"output"`
 	Preserve         bool
+	Statenumber      int
 }
 
 type RootCondition struct {

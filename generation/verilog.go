@@ -54,6 +54,13 @@ func GenerateVerilog(outputDir string) {
 		"upper": strings.ToUpper,
 	}
 
+	var stateNumber = 1
+	for stateName, state := range config.MainConfig.States {
+		state.Statenumber = stateNumber
+		config.MainConfig.States[stateName] = state
+		stateNumber++
+	}
+
 	absPath, err := filepath.Abs(outputDir)
 	if err != nil {
 		zap.S().Fatal("Create fsm path for output", zap.Error(err))

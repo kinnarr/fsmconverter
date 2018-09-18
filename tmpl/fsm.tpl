@@ -32,7 +32,7 @@ module fsm (
 
   output reg [SIZE-1:0] state;
 
-  parameter {{ range $index, $stateName := enumerateKeys .States }}{{upper $stateName}} = {{convertBinary $index $binaryStateSize}}{{if ne $index (minus $countStates 1)}}, {{end}}{{end}};
+  parameter {{ range $stateName, $state := .States }}{{upper $stateName}} = {{convertBinary $state.Statenumber $binaryStateSize}}{{if ne $state.Statenumber (minus $countStates 1)}}, {{end}}{{end}};
 
   reg [SIZE-1:0] next_state;
 
