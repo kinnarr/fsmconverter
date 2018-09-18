@@ -31,6 +31,13 @@ module cu (
 
   parameter {{ range $stateName, $state := .States }}{{upper $stateName}} = {{convertBinary $state.Statenumber $binaryStateSize}}{{if ne $state.Statenumber (minus $countStates 1)}}, {{end}}{{end}};
 
+  initial
+  begin
+    {{ range $outputName, $outputValue := .Defaults.Outputs -}}
+    {{$outputName}} = {{convertBinary $outputValue (index $.Outputs $outputName)}};
+    {{end -}}
+  end
+
   always @ (state)
   begin
     {{ range $outputName, $outputValue := .Defaults.Outputs -}}
