@@ -66,6 +66,8 @@ var printStateCmd = &cobra.Command{
 			for elseName := range state.DefaultSuccessor {
 				fsmOuputBuffer.WriteString(fmt.Sprintf("\telse: next <= %s\n", elseName))
 			}
+		} else {
+			fmt.Printf("State %s not found\n", args[0])
 		}
 
 		fmt.Print(fsmOuputBuffer.String())
