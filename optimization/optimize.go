@@ -90,7 +90,14 @@ func optimizeState(stateName string) bool {
 					delete(state.Successors, nextElseName)
 					state.Successors[nextElseName] = mergeRootConditionsOr(stateRc, nextRC)
 				} else {
-					state.Successors[nextElseName] = nextRC
+					if nextRC.And == nil && nextRC.Or == nil {
+						if state.DefaultSuccessor == nil {
+							state.DefaultSuccessor = make(map[string]interface{})
+						}
+						state.DefaultSuccessor[nextElseName] = struct{}{}
+					} else {
+						state.Successors[nextElseName] = nextRC
+					}
 				}
 			}
 			if found {
@@ -145,6 +152,8 @@ func optimizeState(stateName string) bool {
 			zap.S().Debugf("Next state %s has %d outputs and preserve is %v", elseName, len(elseState.Outputs), elseState.Preserve)
 		}
 	}
+
+	OptimizedConfig.States[stateName] = state
 
 	return stateModified
 }
