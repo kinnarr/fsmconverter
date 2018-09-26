@@ -66,10 +66,10 @@ func conditionToStringOptBinary(c config.Condition, logicalOp string, printBinar
 		}
 	}
 	for _, subcondition := range c.Subconditions {
-		if c.Type == config.ConditionType_And {
+		if subcondition.Type == config.ConditionType_And {
 			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionAndToString(subcondition)))
 		}
-		if c.Type == config.ConditionType_Or {
+		if subcondition.Type == config.ConditionType_Or {
 			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(subcondition)))
 		}
 	}
