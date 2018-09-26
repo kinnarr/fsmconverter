@@ -22,18 +22,18 @@ import (
 	"github.com/kinnarr/fsmconverter/config"
 )
 
-func RootConditionToString(rc config.RootCondition, nextName string) string {
+func RootConditionToString(rc config.Condition, nextName string) string {
 	var conditionBuffer bytes.Buffer
 
-	if rc.And == nil && rc.Or == nil {
+	if len(rc.Subconditions) == 0 {
 		conditionBuffer.WriteString(fmt.Sprintf("\talways: next <= %s\n", nextName))
 	} else {
 		conditionBuffer.WriteString("\tif ")
-		if rc.And != nil {
-			conditionBuffer.WriteString(conditionAndToString(*rc.And))
+		if rc.Type == config.ConditionType_And {
+			conditionBuffer.WriteString(conditionAndToString(rc))
 		}
-		if rc.Or != nil {
-			conditionBuffer.WriteString(conditionOrToString(*rc.Or))
+		if rc.Type == config.ConditionType_Or {
+			conditionBuffer.WriteString(conditionOrToString(rc))
 		}
 		conditionBuffer.WriteString(fmt.Sprintf(": next <= %s\n", nextName))
 	}
@@ -65,11 +65,14 @@ func conditionToStringOptBinary(c config.Condition, logicalOp string, printBinar
 			}
 		}
 	}
-	if c.And != nil {
-		conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionAndToString(*c.And)))
+	for _, subcondition := range c.Subconditions {
+		if c.Type == config.ConditionType_And {
+			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionAndToString(subcondition)))
+		}
+		if c.Type == config.ConditionType_Or {
+			conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(subcondition)))
+		}
 	}
-	if c.Or != nil {
-		conditionStrings = append(conditionStrings, fmt.Sprintf("(%s)", conditionOrToString(*c.Or)))
-	}
-	return strings.Join(conditionStrings, fmt.Sprintf(" %s ", logicalOp))
+	returnString := strings.Join(conditionStrings, fmt.Sprintf(" %s ", logicalOp))
+	return returnString
 }

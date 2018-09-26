@@ -52,6 +52,15 @@ func GenerateVerilog(outputDir string) {
 			return a + 1
 		},
 		"upper": strings.ToUpper,
+		"emptyCondition": func(c config.Condition) bool {
+			return len(c.Subconditions) == 0 && len(c.Conditions) == 0
+		},
+		"conditionIsAnd": func(c config.Condition) bool {
+			return c.Type == config.ConditionType_And
+		},
+		"conditionIsOr": func(c config.Condition) bool {
+			return c.Type == config.ConditionType_Or
+		},
 	}
 
 	var stateNumber = 1

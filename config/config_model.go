@@ -14,6 +14,11 @@
 
 package config
 
+const ( // iota is reset to 0
+	ConditionType_Or  = iota // c0 == 0
+	ConditionType_And = iota // c1 == 1
+)
+
 var MainConfig FsmCreatorConfig
 var IgnoreUnknownStates bool
 var Optimize bool
@@ -21,7 +26,14 @@ var AndString string = "and"
 var OrString string = "or"
 
 type FsmCreatorConfig struct {
-	States   map[string]State `toml:"state"`
+	States   map[string]State
+	Inputs   map[string]int
+	Outputs  map[string]int
+	Defaults defaults
+}
+
+type fsmConverterInputConfig struct {
+	States   map[string]inputState `toml:"state"`
 	Inputs   map[string]int
 	Outputs  map[string]int
 	Defaults defaults
@@ -32,21 +44,35 @@ type defaults struct {
 	State   string
 }
 
-type State struct {
-	Successors       map[string]RootCondition `toml:"next"`
-	DefaultSuccessor map[string]interface{}   `toml:"else"`
-	Outputs          map[string]int           `toml:"output"`
+type inputState struct {
+	Successors       map[string]inputRootCondition `toml:"next"`
+	DefaultSuccessor map[string]interface{}        `toml:"else"`
+	Outputs          map[string]int                `toml:"output"`
 	Preserve         bool
 	Statenumber      int
 }
 
-type RootCondition struct {
-	And *Condition
-	Or  *Condition
+type State struct {
+	Successors       map[string]Condition
+	DefaultSuccessor map[string]interface{}
+	Outputs          map[string]int
+	Preserve         bool
+	Statenumber      int
 }
 
 type Condition struct {
-	And        *Condition
-	Or         *Condition
+	Type          int
+	Conditions    []map[string]int
+	Subconditions []Condition
+}
+
+type inputRootCondition struct {
+	And *inputCondition
+	Or  *inputCondition
+}
+
+type inputCondition struct {
+	And        *inputCondition
+	Or         *inputCondition
 	Conditions []map[string]int `toml:"condition"`
 }

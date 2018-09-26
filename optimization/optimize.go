@@ -16,6 +16,7 @@ package optimization
 
 import (
 	"github.com/kinnarr/fsmconverter/config"
+	"github.com/kinnarr/fsmconverter/generation"
 	"go.uber.org/zap"
 )
 
@@ -76,9 +77,11 @@ func optimizeState(stateName string) bool {
 			for nextNextName, nextNextRC := range nextState.Successors {
 				found = true
 				if stateRc, ok := state.Successors[nextNextName]; ok {
-					zap.S().Debugf("%s already in %s, or-ing", nextNextName, stateName)
+					zap.S().Infof("%s already in %s, or-ing", nextNextName, stateName)
 					delete(state.Successors, nextNextName)
-					state.Successors[nextNextName] = mergeRootConditionsOr(stateRc, mergeRootConditionsAnd(nextRC, nextNextRC))
+					newRoot := mergeRootConditionsOr(stateRc, mergeRootConditionsAnd(nextRC, nextNextRC))
+					state.Successors[nextNextName] = newRoot
+					zap.S().Info(generation.RootConditionToString(newRoot, nextNextName))
 				} else {
 					state.Successors[nextNextName] = mergeRootConditionsAnd(nextRC, nextNextRC)
 				}
@@ -90,7 +93,7 @@ func optimizeState(stateName string) bool {
 					delete(state.Successors, nextElseName)
 					state.Successors[nextElseName] = mergeRootConditionsOr(stateRc, nextRC)
 				} else {
-					if nextRC.And == nil && nextRC.Or == nil {
+					if len(nextRC.Conditions) == 0 && len(nextRC.Subconditions) == 0 {
 						if state.DefaultSuccessor == nil {
 							state.DefaultSuccessor = make(map[string]interface{})
 						}
@@ -158,38 +161,22 @@ func optimizeState(stateName string) bool {
 	return stateModified
 }
 
-func mergeRootConditionsAnd(rc ...config.RootCondition) config.RootCondition {
-	var newRootCondition config.RootCondition
-	newCondition := new(config.Condition)
-	newCondition.And = mergeConditions(rc[0].And, rc[1].And)
-	newCondition.Or = mergeConditions(rc[0].Or, rc[1].Or)
-	if !(newCondition.And == nil && newCondition.Or == nil) {
-		newRootCondition.And = newCondition
+func mergeRootConditionsAnd(rc ...config.Condition) config.Condition {
+	var newRootCondition config.Condition
+	newRootCondition.Subconditions = make([]config.Condition, len(rc))
+	for index, condition := range rc {
+		newRootCondition.Subconditions[index] = condition
 	}
+	newRootCondition.Type = config.ConditionType_And
 	return newRootCondition
 }
 
-func mergeRootConditionsOr(rc ...config.RootCondition) config.RootCondition {
-	var newRootCondition config.RootCondition
-	newCondition := new(config.Condition)
-	newCondition.And = mergeConditions(rc[0].And, rc[1].And)
-	newCondition.Or = mergeConditions(rc[0].Or, rc[1].Or)
-	if !(newCondition.And == nil && newCondition.Or == nil) {
-		newRootCondition.Or = newCondition
+func mergeRootConditionsOr(rc ...config.Condition) config.Condition {
+	var newRootCondition config.Condition
+	newRootCondition.Subconditions = make([]config.Condition, len(rc))
+	for index, condition := range rc {
+		newRootCondition.Subconditions[index] = condition
 	}
+	newRootCondition.Type = config.ConditionType_Or
 	return newRootCondition
-}
-
-func mergeConditions(c1, c2 *config.Condition) *config.Condition {
-	if c1 == nil {
-		return c2
-	}
-	if c2 == nil {
-		return c1
-	}
-	newCondition := new(config.Condition)
-	newCondition.And = mergeConditions(c1.And, c2.And)
-	newCondition.Or = mergeConditions(c1.Or, c2.Or)
-	newCondition.Conditions = append(c1.Conditions, c2.Conditions...)
-	return newCondition
 }

@@ -49,7 +49,7 @@ func ValidateStates() bool {
 				zap.S().Errorf("Unknown state %s for state %s", nextName, stateName)
 				returnValue = false
 			} else {
-				returnValue = validateRootCondition(next, nextName) && returnValue
+				returnValue = validateCondition(next, nextName) && returnValue
 			}
 		}
 		if len(state.DefaultSuccessor) > 1 {
@@ -78,20 +78,6 @@ func ValidateStates() bool {
 	return returnValue
 }
 
-func validateRootCondition(rc config.RootCondition, nextName string) bool {
-	if rc.And != nil && rc.Or != nil {
-		zap.S().Errorf("Root condition can't contain 'and' and 'or' part: %s", nextName)
-		return false
-	}
-	if rc.And != nil {
-		return validateCondition(*rc.And, nextName)
-	}
-	if rc.Or != nil {
-		return validateCondition(*rc.Or, nextName)
-	}
-	return true
-}
-
 func validateCondition(c config.Condition, nextName string) bool {
 	returnValue := true
 	for _, condition := range c.Conditions {
@@ -106,16 +92,12 @@ func validateCondition(c config.Condition, nextName string) bool {
 				}
 			}
 		}
-		if c.And != nil {
-			returnValue = validateCondition(*c.And, nextName) && returnValue
-		}
-		if c.Or != nil {
-			returnValue = validateCondition(*c.Or, nextName) && returnValue
-		}
-		if len(c.Conditions) == 0 && c.And == nil && c.Or == nil {
-			zap.S().Errorf("No conditions found for state! Maybe you forgot an .condition")
-			returnValue = false
-		}
+	}
+	for _, subcondition := range c.Subconditions {
+		returnValue = validateCondition(subcondition, nextName) && returnValue
+	}
+	if len(c.Conditions) == 0 && len(c.Subconditions) == 0 {
+		zap.S().Debugf("No condition found! Assume always: %s", nextName)
 	}
 	return returnValue
 }
