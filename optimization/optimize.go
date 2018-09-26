@@ -79,9 +79,14 @@ func optimizeState(stateName string) bool {
 				if stateRc, ok := state.Successors[nextNextName]; ok {
 					zap.S().Infof("%s already in %s, or-ing", nextNextName, stateName)
 					delete(state.Successors, nextNextName)
-					newRoot := mergeRootConditionsOr(stateRc, mergeRootConditionsAnd(nextRC, nextNextRC))
+					mergedNextRC := mergeRootConditionsAnd(nextRC, nextNextRC)
+					newRoot := mergeRootConditionsOr(stateRc, mergedNextRC)
 					state.Successors[nextNextName] = newRoot
-					zap.S().Info(generation.RootConditionToString(newRoot, nextNextName))
+					zap.S().Debugf("State: %s, cond: %s", stateName, generation.ConditionAutoToString(stateRc))
+					zap.S().Debugf("NextState %s, cond: %s", nextName, generation.ConditionAutoToString(nextRC))
+					zap.S().Debugf("NextNextState: %s, cond: %s", nextNextName, generation.ConditionAutoToString(nextNextRC))
+					zap.S().Debugf("Merged next cond: %s, New cond: %s", generation.ConditionAutoToString(mergedNextRC), generation.ConditionAutoToString(newRoot))
+					zap.S().Debugf("Merged next cond: %s, New cond: %v", generation.ConditionAutoToString(mergedNextRC), newRoot)
 				} else {
 					state.Successors[nextNextName] = mergeRootConditionsAnd(nextRC, nextNextRC)
 				}
@@ -99,7 +104,7 @@ func optimizeState(stateName string) bool {
 						}
 						state.DefaultSuccessor[nextElseName] = struct{}{}
 					} else {
-						state.Successors[nextElseName] = nextRC
+						state.Successors[nextElseName] = optimizeCondition(nextRC)
 					}
 				}
 			}
@@ -130,7 +135,7 @@ func optimizeState(stateName string) bool {
 					delete(state.Successors, nextNextName)
 					state.Successors[nextNextName] = mergeRootConditionsOr(stateRc, nextNextRC)
 				} else {
-					state.Successors[nextNextName] = nextNextRC
+					state.Successors[nextNextName] = optimizeCondition(nextNextRC)
 				}
 			}
 			for nextElseName := range elseState.DefaultSuccessor {
@@ -138,7 +143,7 @@ func optimizeState(stateName string) bool {
 				if stateRc, ok := state.Successors[nextElseName]; ok {
 					zap.S().Debugf("%s already in %s, or-ing", nextElseName, stateName)
 					delete(state.Successors, nextElseName)
-					state.Successors[nextElseName] = stateRc
+					state.Successors[nextElseName] = optimizeCondition(stateRc)
 				} else {
 					state.DefaultSuccessor[nextElseName] = struct{}{}
 				}
@@ -168,6 +173,7 @@ func mergeRootConditionsAnd(rc ...config.Condition) config.Condition {
 		newRootCondition.Subconditions[index] = condition
 	}
 	newRootCondition.Type = config.ConditionType_And
+	newRootCondition = optimizeCondition(newRootCondition)
 	return newRootCondition
 }
 
@@ -178,5 +184,73 @@ func mergeRootConditionsOr(rc ...config.Condition) config.Condition {
 		newRootCondition.Subconditions[index] = condition
 	}
 	newRootCondition.Type = config.ConditionType_Or
+	newRootCondition = optimizeCondition(newRootCondition)
 	return newRootCondition
+}
+
+func optimizeCondition(cond config.Condition) config.Condition {
+	var optimizedSubconditions []config.Condition
+	optimizedSubconditions = make([]config.Condition, 0)
+	for _, subcond := range cond.Subconditions {
+		if subcond.Type == cond.Type {
+			cond.Conditions = mergeConditionInputs(cond.Conditions, subcond.Conditions)
+			for _, subsubcond := range subcond.Subconditions {
+				optimizedSubsubcond := optimizeCondition(subsubcond)
+				if len(optimizedSubsubcond.Conditions) != 0 || len(optimizedSubsubcond.Subconditions) != 0 {
+					optimizedSubconditions = append(optimizedSubconditions, optimizedSubsubcond)
+				}
+			}
+		} else {
+			optimizedSubcond := optimizeCondition(subcond)
+			if len(optimizedSubcond.Conditions) != 0 || len(optimizedSubcond.Subconditions) != 0 {
+				if len(optimizedSubcond.Subconditions) == 1 && len(optimizedSubcond.Conditions) == 0 {
+					optimizedSubconditions = append(optimizedSubconditions, optimizedSubcond.Subconditions[0])
+				} else if len(optimizedSubcond.Subconditions) == 0 && len(optimizedSubcond.Conditions) == 1 && len(optimizedSubcond.Conditions[0]) == 1 {
+					cond.Conditions = mergeConditionInputs(cond.Conditions, optimizedSubcond.Conditions)
+				} else {
+					optimizedSubconditions = append(optimizedSubconditions, optimizedSubcond)
+				}
+			}
+		}
+	}
+	cond.Subconditions = optimizedSubconditions
+	if len(cond.Subconditions) == 1 {
+		emptyConditions := true
+		for _, condList := range cond.Conditions {
+			emptyConditions = emptyConditions && (len(condList) == 0)
+		}
+		if emptyConditions {
+			return optimizeCondition(cond.Subconditions[0])
+		}
+	}
+	return cond
+}
+
+func mergeConditionInputs(condInputParameters ...[]map[string]int) []map[string]int {
+	returnValue := make([]map[string]int, 1)
+	returnValue[0] = make(map[string]int)
+	for _, condInputParameter := range condInputParameters {
+		for _, condInputs := range condInputParameter {
+			for condInput, condValue := range condInputs {
+				for retIndex, retList := range returnValue {
+					if condExistingValue, ok := retList[condInput]; ok {
+						if condExistingValue == condValue {
+							break
+						} else if len(returnValue) == (retIndex + 1) {
+							newMap := make(map[string]int)
+							newMap[condInput] = condValue
+							returnValue = append(returnValue, newMap)
+						}
+					} else {
+						returnValue[retIndex][condInput] = condValue
+						break
+					}
+				}
+			}
+		}
+	}
+	if len(returnValue) == 1 && len(returnValue[0]) == 0 {
+		return []map[string]int{}
+	}
+	return returnValue
 }
