@@ -40,6 +40,20 @@ func RootConditionToString(rc config.Condition, nextName string) string {
 	return conditionBuffer.String()
 }
 
+func ConditionAutoToString(c config.Condition) string {
+	if len(c.Subconditions) == 0 {
+		return "always"
+	} else {
+		if c.Type == config.ConditionType_And {
+			return conditionAndToString(c)
+		}
+		if c.Type == config.ConditionType_Or {
+			return conditionOrToString(c)
+		}
+	}
+	return "never"
+}
+
 func conditionAndToString(c config.Condition) string {
 	return conditionToString(c, config.AndString)
 }
